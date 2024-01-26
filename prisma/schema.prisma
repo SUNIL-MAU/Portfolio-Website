@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model projects {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  tags        skills[]
+  images      String[]
+  ProjectType ProjectType @default(Individual)
+  createdAt   DateTime    @default(now())
+}
+
+model skills {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  createdAt  DateTime  @default(now())
+  projects   projects? @relation(fields: [projectsId], references: [id])
+  projectsId String?   @db.ObjectId
+}
+
+model experience {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  location  String
+  from      DateTime
+  to        DateTime
+  isPresent Boolean  @default(false)
+  createdAt DateTime @default(now())
+  icon      String
+}
+
+model Image {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String // URL of the image
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ProjectType {
+  Individual
+  Organization
+}

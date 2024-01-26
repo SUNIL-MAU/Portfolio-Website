@@ -2,7 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -14,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { signIn } from "@/auth";
+import { signIn } from "next-auth/react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -34,14 +40,20 @@ export default function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
-    // signIn("credentials");
+    const response = await signIn("credentials", {
+      ...values,
+      redirect: true,
+      callbackUrl: "/",
+    });
+    console.log(response);
   }
   return (
-    <Card className=" bg-white w-full mx-5 md:mx-0 py-8 md:w-[400px]">
+    <Card className=" bg-white w-full mx-5 md:mx-0 pb-6 pt-4 md:w-[400px]">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-xl text-center">
+        <CardTitle className="text-6xl text-center">🔐</CardTitle>
+        <CardDescription className=" text-center font-semibold">
           Login your account
-        </CardTitle>
+        </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2">
         <Form {...form}>
