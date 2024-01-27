@@ -21,7 +21,7 @@ export default function DashboardLayout({
           <Sidebar />
         </div>
         <div className=" flex-1 ">
-          <div className=" mx-auto max-w-5xl px-6  ">{children}</div>
+          <div className=" mx-auto max-w-5xl px-6 pt-6 ">{children}</div>
         </div>
       </div>
     </div>

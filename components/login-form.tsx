@@ -51,8 +51,8 @@ export default function LoginForm() {
     <Card className=" bg-white w-full mx-5 md:mx-0 pb-6 pt-4 md:w-[400px]">
       <CardHeader className="space-y-1">
         <CardTitle className="text-6xl text-center">🔐</CardTitle>
-        <CardDescription className=" text-center font-semibold">
-          Login your account
+        <CardDescription className=" text-3xl text-center font-bold">
+          Login
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2">

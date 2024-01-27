@@ -7,22 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model projects {
+model project {
   id          String      @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
-  tags        skills[]
+  tags        skill[]
   images      String[]
   ProjectType ProjectType @default(Individual)
   createdAt   DateTime    @default(now())
 }
 
-model skills {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+model skill {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
   title      String
-  createdAt  DateTime  @default(now())
-  projects   projects? @relation(fields: [projectsId], references: [id])
-  projectsId String?   @db.ObjectId
+  createdAt  DateTime @default(now())
+  projects   project? @relation(fields: [projectsId], references: [id])
+  projectsId String?  @db.ObjectId
 }
 
 model experience {
