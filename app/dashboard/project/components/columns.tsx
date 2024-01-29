@@ -4,15 +4,20 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { CellAction } from "./cell-action";
 
-import { project } from "@prisma/client";
+import { $Enums, project } from "@prisma/client";
 export type ProjectColumn = {
   id: string;
   title: string;
   description: string;
   images: string[];
-  tags: string[];
-  ProjectType: project["ProjectType"];
-  createdAt: Date;
+  tags?: {
+    id: string;
+    title: string;
+    createdAt: Date;
+    projectsId: string | null;
+  }[];
+  ProjectType: $Enums.ProjectType;
+  createdAt: string;
 };
 
 export const columns: ColumnDef<ProjectColumn>[] = [

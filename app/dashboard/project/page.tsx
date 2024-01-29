@@ -15,9 +15,9 @@ const ProjectPage = async () => {
     title: item.title,
     description: item.description,
     images: item.images,
-    tags: item.tags.map((tag) => tag.title),
-    projectType: item.ProjectType, // Changed from item.ProjectType
+    tags: item.tags,
     createdAt: format(item.createdAt, "MMMM do, yyyy"),
+    ProjectType: item.ProjectType,
   }));
 
   return (

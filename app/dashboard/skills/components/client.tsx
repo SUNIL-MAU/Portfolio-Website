@@ -7,12 +7,11 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Heading } from "@/components/heading";
 import { Separator } from "@/components/ui/separator";
-import { project } from "@prisma/client";
 
-import { ProjectColumn, columns } from "./columns";
+import { SkillColumn, columns } from "./columns";
 
 interface ProductsClientProps {
-  data: ProjectColumn[];
+  data: SkillColumn[];
 }
 
 export const ProductsClient: React.FC<ProductsClientProps> = ({ data }) => {
@@ -22,15 +21,15 @@ export const ProductsClient: React.FC<ProductsClientProps> = ({ data }) => {
     <>
       <div className="flex items-center justify-between">
         <Heading
-          title={`Products (${data.length})`}
-          description="Manage products for your store"
+          title={`Skills (${data.length})`}
+          description="Manage Skills for your portfolio"
         />
-        <Button onClick={() => router.push(`/dashboard/project/new`)}>
+        <Button onClick={() => router.push(`/dashboard/skills/new`)}>
           <Plus className="mr-2 h-4 w-4" /> Add New
         </Button>
       </div>
       <Separator />
-      <DataTable searchKey="name" columns={columns} data={data} />
+      <DataTable searchKey="title" columns={columns} data={data} />
     </>
   );
 };

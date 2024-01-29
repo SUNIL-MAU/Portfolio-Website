@@ -63,8 +63,6 @@ export const SkillForm: React.FC<ProjectFormProps> = ({ initialData }) => {
     defaultValues,
   });
 
-  const { getValues, setValue } = form;
-
   const onSubmit = async (data: ProjectFormValues) => {
     console.log(data, "data");
     try {
@@ -75,7 +73,7 @@ export const SkillForm: React.FC<ProjectFormProps> = ({ initialData }) => {
         await axios.post(`/api/skill`, data);
       }
       router.refresh();
-      // router.push(`/`);
+      router.push(`/dashboard/skills`);
       toast.success(toastMessage);
     } catch (error: any) {
       console.log("error", error);

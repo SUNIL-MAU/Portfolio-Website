@@ -4,24 +4,24 @@ import * as z from "zod";
 import axios from "axios";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { Trash } from "lucide-react";
 import Image from "next/image";
 import { skill, project } from "@prisma/client";
+import MultiSelect from "react-select";
 import { useParams, useRouter } from "next/navigation";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/heading";
 import { AlertModal } from "@/components/modals/alert-modal";
@@ -32,19 +32,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { Textarea } from "@/components/ui/textarea";
-// import ImageUpload from "@/components/ui/image-upload";
 
 // import ImageUpload from "@/components/ui/image-upload";
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "video/mp4",
-  "video/webm",
-];
 
 const formSchema = z.object({
   title: z.string().min(1),
@@ -56,9 +47,19 @@ const formSchema = z.object({
     .max(160, {
       message: "description must not be longer than 30 characters.",
     }),
-  images: z.string().min(1),
-  tags: z.string().min(1),
+  // images: z.array(z.string()).min(1),
   ProjectType: z.string().min(1),
+  skills: z
+    .array(
+      z.object({
+        value: z.string(),
+        label: z.string().min(1),
+        id: z.string().min(1),
+      })
+    )
+    .refine((phones) => phones.length >= 1, {
+      message: "At least one phone number is required",
+    }),
 });
 
 type ProjectFormValues = z.infer<typeof formSchema>;
@@ -73,27 +74,26 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   skills,
 }) => {
   const params = useParams();
-  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const title = initialData ? "Edit Project" : "Create Project";
   const description = initialData ? "Edit a Project." : "Add a new Project";
   const toastMessage = initialData ? "Project updated." : "Project created.";
   const action = initialData ? "Save changes" : "Create";
-
   const defaultValues = initialData
     ? {
         ...initialData,
-        images: initialData.images.join(", "), // convert array to string
+        // images: initialData.images.join(", "),
+        skills: [],
+        // convert array to string
       }
     : {
         title: "",
         description: "",
-        tags: "",
         ProjectType: "",
-        images: "",
+        // images: "",
+        skills: [],
       };
 
   const form = useForm<ProjectFormValues>({
@@ -101,7 +101,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     defaultValues,
   });
 
-  const { getValues, setValue } = form;
+  const { control, register, setValue, getValues } = form;
+  const { fields, append } = useFieldArray({
+    name: "skills",
+    control,
+  });
 
   const onSubmit = async (data: ProjectFormValues) => {
     console.log(data, "data");
@@ -222,35 +226,37 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
 
             <FormField
               control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Skills</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          defaultValue={field.value}
-                          placeholder="Skills"
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {skills.map((skill) => (
-                        <SelectItem key={skill.id} value={skill.id}>
-                          {skill.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              name="skills"
+              render={({ field }) => {
+                console.log("field", field);
+                return (
+                  <FormItem>
+                    <FormLabel>Skills</FormLabel>
+                    <MultiSelect
+                      isMulti
+                      {...field}
+                      unstyled
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      value={getValues("skills")}
+                      options={skills.map((p) => ({
+                        value: p.title,
+                        label: p.title,
+                        id: p.id,
+                      }))}
+                      placeholder={"choose skills"}
+                      onChange={(e) => {
+                        console.log(e);
+                        setValue(
+                          "skills",
+                          e.map((p) => p)
+                        );
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <FormField
