@@ -2,6 +2,8 @@ import { format } from "date-fns";
 import { ProductsClient } from "./components/client";
 import { db } from "@/lib/db";
 import { ProjectColumn } from "./components/columns";
+import nextAuth, { getServerSession } from "next-auth";
+import { AuthHandler } from "next-auth/core";
 
 const ProjectPage = async () => {
   const products = await db.project.findMany({
@@ -9,7 +11,8 @@ const ProjectPage = async () => {
       tags: true,
     },
   });
-
+  const session = await getServerSession();
+  console.log(session, "session slfsljl");
   const formattedProject: ProjectColumn[] = products.map((item) => ({
     id: item.id,
     title: item.title,

@@ -13,6 +13,7 @@ import MultiSelect from "react-select";
 import { useParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
 import {
   Form,
   FormControl,
@@ -35,6 +36,8 @@ import {
 
 import { Textarea } from "@/components/ui/textarea";
 
+import UploadButton from "@/components/UploadButton";
+
 // import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
@@ -47,7 +50,7 @@ const formSchema = z.object({
     .max(160, {
       message: "description must not be longer than 30 characters.",
     }),
-  // images: z.array(z.string()).min(1),
+  images: z.array(z.string()).min(1),
   ProjectType: z.string().min(1),
   skills: z
     .array(
@@ -84,15 +87,14 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const defaultValues = initialData
     ? {
         ...initialData,
-        // images: initialData.images.join(", "),
+        images: initialData.images,
         skills: [],
-        // convert array to string
       }
     : {
         title: "",
         description: "",
         ProjectType: "",
-        // images: "",
+        images: [],
         skills: [],
       };
 
@@ -173,38 +175,32 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-full"
         >
-          {/* <FormField
+          <FormField
             control={form.control}
             name="images"
-            render={() => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Images</FormLabel>
                 <FormControl>
-                  {getValues("image") ? (
-                    <div className="mb-4 flex items-center gap-4 justify-center bg-slate-100 py-4 rounded-sm">
-                      <div className="relative w-[200px] h-[200px] rounded-md overflow-hidden">
-                        <img
-                          src={getValues("image")}
-                          className="object-cover"
-                          alt="preview-image"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <ImageUpload
-                        onImageCompleteHandle={(data) => {
-                          setValue("image", data);
-                        }}
-                        disabled={loading}
-                      />
-                    </div>
-                  )}
+                  {/* <UploadButton
+                    className=" w-full"
+                    endpoint="fileUploader"
+                    onClientUploadComplete={(res) => {
+                      // Do something with the response
+                      console.log("Files: ", res);
+                      alert("Upload Completed");
+                    }}
+                    onUploadError={(error: Error) => {
+                      // Do something with the error.
+                      alert(`ERROR! ${error.message}`);
+                    }}
+                  /> */}
+                  <UploadButton isSubscribed={true} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
-          /> */}
+          />
           <div className="md:grid md:grid-cols-3 gap-8">
             <FormField
               control={form.control}
@@ -228,7 +224,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               control={form.control}
               name="skills"
               render={({ field }) => {
-                console.log("field", field);
                 return (
                   <FormItem>
                     <FormLabel>Skills</FormLabel>
@@ -246,7 +241,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                       }))}
                       placeholder={"choose skills"}
                       onChange={(e) => {
-                        console.log(e);
                         setValue(
                           "skills",
                           e.map((p) => p)

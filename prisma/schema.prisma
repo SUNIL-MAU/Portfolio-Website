@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model user {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String
+  password String
+}
+
 model project {
   id          String      @id @default(auto()) @map("_id") @db.ObjectId
   title       String
@@ -36,11 +42,21 @@ model experience {
   icon      String
 }
 
-model Image {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  url       String // URL of the image
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  FAILED
+  SUCCESS
+}
+
+model File {
+  id           String       @id @default(cuid()) @map("_id")
+  name         String
+  uploadStatus UploadStatus @default(PENDING)
+  url          String
+  key          String
+  fileType     String
+  createdAt    DateTime     @default(now())
 }
 
 enum ProjectType {

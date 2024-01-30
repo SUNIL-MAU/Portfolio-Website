@@ -20,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -43,7 +43,7 @@ export default function LoginForm() {
     const response = await signIn("credentials", {
       ...values,
       redirect: true,
-      callbackUrl: "/",
+      callbackUrl: "/dashboard/project",
     });
     console.log(response);
   }
