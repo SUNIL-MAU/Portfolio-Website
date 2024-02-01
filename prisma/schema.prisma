@@ -42,21 +42,12 @@ model experience {
   icon      String
 }
 
-enum UploadStatus {
-  PENDING
-  PROCESSING
-  FAILED
-  SUCCESS
-}
-
 model File {
-  id           String       @id @default(cuid()) @map("_id")
-  name         String
-  uploadStatus UploadStatus @default(PENDING)
-  url          String
-  key          String
-  fileType     String
-  createdAt    DateTime     @default(now())
+  id        String   @id @default(cuid()) @map("_id")
+  name      String
+  url       String
+  key       String
+  createdAt DateTime @default(now())
 }
 
 enum ProjectType {

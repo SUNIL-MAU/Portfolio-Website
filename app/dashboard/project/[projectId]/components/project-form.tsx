@@ -2,7 +2,7 @@
 
 import * as z from "zod";
 import axios from "axios";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -37,20 +37,24 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import UploadButton from "@/components/UploadButton";
+import { useSelectFile } from "@/context/select-file-context";
+import { FileType } from "@/__global/type";
 
 // import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
   title: z.string().min(1),
-  description: z
-    .string()
-    .min(10, {
-      message: "description must be at least 10 characters.",
+  description: z.string().min(1, {
+    message: "description is required",
+  }),
+
+  images: z.array(
+    z.object({
+      key: z.string(),
+      url: z.string(),
+      name: z.string(),
     })
-    .max(160, {
-      message: "description must not be longer than 30 characters.",
-    }),
-  images: z.array(z.string()).min(1),
+  ),
   ProjectType: z.string().min(1),
   skills: z
     .array(
@@ -77,6 +81,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   skills,
 }) => {
   const params = useParams();
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -87,8 +92,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const defaultValues = initialData
     ? {
         ...initialData,
-        images: initialData.images,
-        skills: [],
+        images: initialData.images.map((imgUrl) => ({
+          url: imgUrl,
+        })),
+        skills: skills,
       }
     : {
         title: "",
@@ -103,33 +110,36 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     defaultValues,
   });
 
-  const { control, register, setValue, getValues } = form;
-  const { fields, append } = useFieldArray({
-    name: "skills",
-    control,
-  });
+  const { setValue, getValues } = form;
+  const { selectedFile, setSelectedFile } = useSelectFile();
+
+  useEffect(() => {
+    if (selectedFile.length > 0) {
+      setValue("images", [...selectedFile.map((p) => p)]);
+    }
+  }, [selectedFile, setValue, setSelectedFile]);
 
   const onSubmit = async (data: ProjectFormValues) => {
     console.log(data, "data");
-    // try {
-    //   setLoading(true);
-    //   if (initialData) {
-    //     await axios.patch(
-    //       `/api/${params.storeId}/Projects/${params.ProjectId}`,
-    //       data
-    //     );
-    //   } else {
-    //     await axios.post(`/api/${params.storeId}/Projects`, data);
-    //   }
-    //   router.refresh();
-    //   router.push(`/${params.storeId}/Projects`);
-    //   toast.success(toastMessage);
-    // } catch (error: any) {
-    //   console.log("error", error);
-    //   toast.error("Something went wrong.");
-    // } finally {
-    //   setLoading(false);
-    // }
+    try {
+      setLoading(true);
+      if (initialData) {
+        await axios.patch(
+          `/api/${params.storeId}/Projects/${params.ProjectId}`,
+          data
+        );
+      } else {
+        await axios.post(`/api/project`, data);
+      }
+      router.refresh();
+      router.push(`/dashboard/project`);
+      toast.success(toastMessage);
+    } catch (error: any) {
+      console.log("error", error);
+      toast.error("Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onDelete = async () => {
@@ -182,20 +192,16 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               <FormItem>
                 <FormLabel>Images</FormLabel>
                 <FormControl>
-                  {/* <UploadButton
-                    className=" w-full"
-                    endpoint="fileUploader"
-                    onClientUploadComplete={(res) => {
-                      // Do something with the response
-                      console.log("Files: ", res);
-                      alert("Upload Completed");
-                    }}
-                    onUploadError={(error: Error) => {
-                      // Do something with the error.
-                      alert(`ERROR! ${error.message}`);
-                    }}
-                  /> */}
-                  <UploadButton isSubscribed={true} />
+                  <div className=" my-4 flex gap-2">
+                    <UploadButton
+                      files={field.value}
+                      label={"Upload Image"}
+                      onChange={(files: FileType[]) => {
+                        files.map((p) => getValues("images").push(p));
+                      }}
+                      fileType="image"
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
