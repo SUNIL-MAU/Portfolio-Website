@@ -2,7 +2,32 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { FileType, OptionType } from "@/__global/type";
 
-export async function POST(req: Request) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: { projectId: string } }
+) {
+  try {
+    if (!params.projectId) {
+      return new NextResponse("project id is required", { status: 400 });
+    }
+
+    await db.project.delete({
+      where: {
+        id: params.projectId,
+      },
+    });
+
+    return NextResponse.json("project deleted!");
+  } catch (error) {
+    console.log("[PROJECT_DELETE]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: { projectId: string } }
+) {
   try {
     const body = await req.json();
 
@@ -27,7 +52,10 @@ export async function POST(req: Request) {
       return new NextResponse("skills  is required", { status: 400 });
     }
 
-    const newProject = await db.project.create({
+    const updatedProject = await db.project.update({
+      where: {
+        id: params.projectId,
+      },
       data: {
         title,
         description,
@@ -43,9 +71,9 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json("newProject");
-  } catch (error) {
-    console.log("[PROJECT_POST]", error);
+    return NextResponse.json("Project updated!");
+  } catch (error: unknown) {
+    console.log("[PROJECT_UPDATE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

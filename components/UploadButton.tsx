@@ -149,7 +149,7 @@ const UploadButton = ({
   fileType,
 }: {
   files: FileType[];
-  onChange: (e: FileType[]) => void;
+  onChange?: (e: FileType[]) => void;
   label: string;
   fileType: string;
 }) => {
@@ -158,7 +158,9 @@ const UploadButton = ({
 
   const onUploadComplete = (files: FileType[]) => {
     setIsOpen(!open);
-    onChange(files);
+    if (onChange) {
+      onChange(files);
+    }
   };
 
   return (
@@ -199,25 +201,14 @@ const UploadButton = ({
             ))}
           </div>
         ) : null}
-        <div className=" flex gap-4 my-6">
-          <Link
-            href={{
-              pathname: "/dashboard/media",
-              query: { redirectTo: "/dashboard/project/new" },
-            }}
-            className={cn(buttonVariants({ variant: "outline" }))}
-          >
-            From Gallery
-          </Link>
 
-          <DialogTrigger onClick={() => setIsOpen(true)} asChild>
-            <div className=" flex gap-4">
-              <Button type="button" variant={"default"}>
-                {label}
-              </Button>
-            </div>
-          </DialogTrigger>
-        </div>
+        <DialogTrigger onClick={() => setIsOpen(true)} asChild>
+          <div className=" flex gap-4">
+            <Button type="button" variant={"default"}>
+              {label}
+            </Button>
+          </div>
+        </DialogTrigger>
 
         <DialogContent className="max-w-2xl w-full">
           <Heading

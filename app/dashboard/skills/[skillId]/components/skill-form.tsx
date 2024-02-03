@@ -68,7 +68,7 @@ export const SkillForm: React.FC<ProjectFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       if (initialData) {
-        await axios.patch(`/api/Projects/${params.ProjectId}`, data);
+        await axios.patch(`/api/skill/${params.skillId}`, data);
       } else {
         await axios.post(`/api/skill`, data);
       }

@@ -12,7 +12,7 @@ import { skill, project } from "@prisma/client";
 import MultiSelect from "react-select";
 import { useParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 import {
   Form,
@@ -39,6 +39,8 @@ import { Textarea } from "@/components/ui/textarea";
 import UploadButton from "@/components/UploadButton";
 import { useSelectFile } from "@/context/select-file-context";
 import { FileType } from "@/__global/type";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 // import ImageUpload from "@/components/ui/image-upload";
 
@@ -95,7 +97,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         images: initialData.images.map((imgUrl) => ({
           url: imgUrl,
         })),
-        skills: skills,
+        skills: skills.map((p) => ({
+          value: p.title,
+          label: p.title,
+          id: p.id,
+        })),
       }
     : {
         title: "",
@@ -104,6 +110,8 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         images: [],
         skills: [],
       };
+
+  console.log("defaultValues", defaultValues);
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(formSchema),
@@ -120,14 +128,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   }, [selectedFile, setValue, setSelectedFile]);
 
   const onSubmit = async (data: ProjectFormValues) => {
-    console.log(data, "data");
+    console.log("data", data);
     try {
       setLoading(true);
       if (initialData) {
-        await axios.patch(
-          `/api/${params.storeId}/Projects/${params.ProjectId}`,
-          data
-        );
+        await axios.patch(`/api/project/${params.projectId}`, data);
       } else {
         await axios.post(`/api/project`, data);
       }
@@ -135,7 +140,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       router.push(`/dashboard/project`);
       toast.success(toastMessage);
     } catch (error: any) {
-      console.log("error", error);
       toast.error("Something went wrong.");
     } finally {
       setLoading(false);
@@ -143,19 +147,18 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   };
 
   const onDelete = async () => {
-    console.log("delete fire..");
-    // try {
-    //   setLoading(true);
-    //   await axios.delete(`/api/${params.storeId}/Projects/${params.ProjectId}`);
-    //   router.refresh();
-    //   router.push(`/${params.storeId}/Projects`);
-    //   toast.success("Project deleted.");
-    // } catch (error: any) {
-    //   toast.error("Something went wrong.");
-    // } finally {
-    //   setLoading(false);
-    //   setOpen(false);
-    // }
+    try {
+      setLoading(true);
+      await axios.delete(`/api/project/${params.projectId}`);
+      router.refresh();
+      router.push(`/dashboard/project`);
+      toast.success("Project deleted.");
+    } catch (error: any) {
+      toast.error("Something went wrong.");
+    } finally {
+      setLoading(false);
+      setOpen(false);
+    }
   };
 
   return (
@@ -192,15 +195,26 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               <FormItem>
                 <FormLabel>Images</FormLabel>
                 <FormControl>
-                  <div className=" my-4 flex gap-2">
-                    <UploadButton
-                      files={field.value}
-                      label={"Upload Image"}
-                      onChange={(files: FileType[]) => {
-                        files.map((p) => getValues("images").push(p));
+                  <div className=" flex gap-4 my-6 items-center">
+                    <div className=" my-4 flex gap-2">
+                      <UploadButton
+                        files={field.value}
+                        label={"Upload Image"}
+                        onChange={(files: FileType[]) => {
+                          files.map((p) => getValues("images").push(p));
+                        }}
+                        fileType="image"
+                      />
+                    </div>
+                    <Link
+                      href={{
+                        pathname: "/dashboard/media",
+                        query: { redirectTo: "/dashboard/project/new" },
                       }}
-                      fileType="image"
-                    />
+                      className={cn(buttonVariants({ variant: "outline" }))}
+                    >
+                      From Gallery
+                    </Link>
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -239,7 +253,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                       unstyled
                       className="react-select-container"
                       classNamePrefix="react-select"
-                      value={getValues("skills")}
+                      value={field.value}
                       options={skills.map((p) => ({
                         value: p.title,
                         label: p.title,

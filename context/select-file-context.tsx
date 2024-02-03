@@ -21,7 +21,6 @@ export default function SelectFileProvider({
   children,
 }: SelectFileProviderProps) {
   const [selectedFile, setSelectedFile] = useState<FileType[]>([]);
-  console.log("ActiveSectionContext", selectedFile);
 
   const addFile = useCallback(
     (file: FileType) => {
